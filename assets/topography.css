@@ -1,0 +1,179 @@
+.text-dd {
+    background: #EAEAEA;
+    border: 0.01mm solid black;
+   
+    padding: 2mm;
+    border-radius: 5px;
+    padding-top: 7mm;
+    
+    
+    }
+
+
+.button {
+    
+    margin-top: 1px;
+    border: black;
+    display: inline-block;
+    font-size: 16px;
+    color: black;
+    border-radius:5px;
+    transition: background-color 0.4s;
+    padding-bottom: 5mm;
+    padding-top: 3mm;
+
+  }
+
+  .button2 {
+    display: block;
+  }
+
+.export{
+    margin-top: 1px;
+    border: black;
+    display: inline-block;
+    font-size: 16px;
+    color: white;
+    border-radius:5px;
+    transition: background-color 0.4s;
+    padding-bottom: 1mm;
+    padding-top: 1mm;
+    padding-right: 5mm;
+    padding-left: 5mm;
+    white-space: nowrap;
+    text-align: center;
+    background-color: black;
+    margin-bottom: 5px;
+}
+  
+  p {
+    display: inline-block;
+    margin-right: 7px
+  }
+
+  .inline { 
+      display: inline;
+  }
+
+  .header {
+      padding-top: 3mm;
+      padding-bottom: 5mm;
+  }
+
+  .top_header {
+    padding-top: 6mm;
+    padding-bottom: 2mm;
+}
+
+
+  
+
+  .table {
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      padding: 10px;
+      border: 1px solid black;
+    
+      text-emphasis-color: black;
+  }
+
+  .table-2-1 {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding-top: 10mm;
+    padding-bottom: 1mm;
+    border: 1px solid black;
+    padding-left: 10mm;
+    
+  
+    
+}
+
+
+  .button_offset {
+
+    white-space: nowrap;
+    text-align: center;
+    background-color: black;
+    
+    
+  }
+
+  .button_div {
+      padding-left: 10mm;
+  }
+ 
+.footer-text {
+    padding-bottom: 7mm;
+}
+
+.graph-layout {
+
+    background-color: #f8f9fa;
+    padding-right: 2px;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 3mm;
+    padding-left: 4px;
+}
+
+
+.custom_navbar {
+    height: 80px;
+}
+
+.navbar_heading {
+
+    padding-left: 10mm;
+    padding-top: 1mm;
+    font-weight: bold;
+}
+
+.main_layout {
+    padding-left: 2mm;
+    
+}
+
+.navbar_heading_size {
+    font-size: 2cm;
+}
+
+.graph-layout-2 {
+
+    background-color: #f8f9fa;
+    padding-right: 2px;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 3mm;
+    padding-left: 10px;
+}
+
+
+.dropdown_align {
+
+    padding-top: 5mm;
+}
+
+.text-dd {
+    background: #f8f9fa;
+    border: 0.01mm solid black;
+   
+    padding: 5mm;
+    border-radius: 5px;
+    padding-top: 7mm;
+    
+    
+    }
+
+    .p_offset{
+
+        padding-top: 1mm;
+
+    }
+
+    .text_box {
+
+        padding-top: 5mm;
+    }
