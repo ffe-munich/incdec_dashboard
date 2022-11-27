@@ -1,5 +1,5 @@
 import dash
-import ps
+import os
 import dash_bootstrap_components as dbc
 from dash import html, dcc
 os.environ["PYHON_VERSION"] = 3.9
