@@ -1,7 +1,8 @@
 import dash
+import ps
 import dash_bootstrap_components as dbc
 from dash import html, dcc
-
+os.environ["PYHON_VERSION"] = 3.9
 
 app = dash.Dash(
     __name__,  external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True
