@@ -444,11 +444,26 @@ def strategies_select(load_sel, strategy, capacity_mw, mo_df, mo, dd_merit, ud_m
     Input(component_id='new_table-2', component_property='data'),
     Input(component_id='strategy-2', component_property='value'),)
 def add_select_options(data,strategy_sel):
-    data = pd.DataFrame(data)
-    if data.empty:
-        data = pd.DataFrame(columns=['Name'])
-    dict_select = [{'label': 'None', 'value': None}] + \
-        [{'label': i, 'value': i.split('(')[0]} for i in data.Name.tolist()]
+    
+    if strategy_sel != 'Stochastic Non-Attribution':
+        data = pd.DataFrame(data)
+        if data.empty:
+            data = pd.DataFrame(columns=['Name'])
+    
+        col_name = data.Name.tolist()
+ 
+    else:
+        data = pd.DataFrame(data)
+        if data.empty:
+            data = pd.DataFrame(columns=['Name'])
+        
+        
+        col_name = data[data.rd != 0].Name.tolist()
+        
+        
+        
+    
+    dict_select =[{'label': 'None', 'value': None}] + [{'label': i, 'value': i} for i in col_name] 
     return dict_select
 
 

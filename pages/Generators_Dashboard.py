@@ -382,18 +382,20 @@ def update_graph(data1, columns1, data2, columns2, load_mw, capacity_mw, anticip
     Input(component_id='strategy', component_property='value'),)
 def add_select_options(data,strategy_sel):
     
-    data = pd.DataFrame(data)
-    if data.empty:
-        data = pd.DataFrame(columns=['name'])
-    print(data.head(10))
-    # col_name = [i.split('(')[0] for i in data.name.tolist()]
-    col_name = data.name.tolist()
-    # combinations = []
-    # for r in range(len(col_name)+1):
-    #     for combination in itertools.combinations(col_name, r):
-    #         combinations.append(combination)
-            
-    # print(combinations)
+    if strategy_sel != 'Stochastic Non-Attribution':
+        data = pd.DataFrame(data)
+        if data.empty:
+            data = pd.DataFrame(columns=['name'])
+        col_name = data.name.tolist()
+    
+    else:
+        data = pd.DataFrame(data)
+        if data.empty:
+            data = pd.DataFrame(columns=['name'])
+        col_name = data[data.rd != 0].name.tolist()
+        
+        
+        
     
     dict_select =[{'label': 'None', 'value': None}] + [{'label': i, 'value': i} for i in col_name] 
     return dict_select
