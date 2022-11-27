@@ -25,7 +25,6 @@ kiwisolver==1.4.4
 MarkupSafe==2.1.1
 matplotlib
 matplotlib-inline
-nashpy
 numpy
 opencv-python-headless
 packaging
