@@ -391,6 +391,7 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
                 
         
         if type == 'gen':
+            
             ud_price = ud_merit.red_bid[ud_merit.rd != 0].max()
             dd_price = dd_merit.red_bid[dd_merit.rd != 0].min()
             mo_df.sort_values(by='bid', ascending=True, inplace= True)
@@ -406,18 +407,38 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
             mo_df.loc[mo_df['name'] == sel, 'real_WTP'] = clearing_price
         
         mo_df['payoff_anticipated_strategy'] = mo_df.apply(lambda x: payoffs(x,cp=clearing_price,udp=ud_price,ddp=dd_price, type = board,redispatch_pricing=redispatch_pricing ),axis=1)
-        print(mo_df.head())
+        print(mo_df.head(6))
         if sel in dd_merit['name'].tolist():
             
                                                                                               
             if type == 'gen':                                                                                  
                                                                                               
                 dd_merit.loc[dd_merit['name'] == sel, 'color'] = '#7198c0'
+                rd_sum = sum(dd_merit['rd'].tolist())
+                rd_sum = -1 * rd_sum
+                for idx, row in dd_merit.iterrows():   
+                    if rd_sum >= row.disp:
+                        dd_merit.loc[idx,'rd'] = -1*row.disp
+                        rd_sum -= row.disp
+                    else:
+                        dd_merit.loc[idx,'rd'] = -1*rd_sum
+                        rd_sum = 0
                 dd_price=dd_merit.red_bid[dd_merit.rd!=0].min()
+                
                 
             else:
                 
                 dd_merit.loc[dd_merit['Name'] == sel, 'color'] = '#f3be67'
+                rd_sum = sum(dd_merit['rd'].tolist())
+                rd_sum = -1 * rd_sum
+                for idx, row in dd_merit.iterrows():   
+                    if rd_sum >= row.disp:
+                        dd_merit.loc[idx,'rd'] = -1*row.disp
+                        rd_sum -= row.disp
+                    else:
+                        dd_merit.loc[idx,'rd'] = -1*rd_sum
+                        rd_sum = 0
+               
                 dd_price = dd_merit.red_bid[dd_merit.rd != 0].max()
  
             
@@ -433,10 +454,30 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
             
             if type == 'gen':
                 ud_merit.loc[ud_merit['name'] == sel, 'color'] = '#f3be67' 
+                rd_sum = sum(ud_merit['rd'].tolist())
+                ud_merit['rd'] = 0
+                for idx, row in ud_merit.iterrows():
+                    if rd_sum >= row.cap:
+                        ud_merit.loc[idx,'rd'] = row.cap
+                        rd_sum -= row.cap
+                    else:
+                        ud_merit.loc[idx,'rd'] = rd_sum
+                        rd_sum = 0
                 ud_price = ud_merit.red_bid[ud_merit.rd!=0].max()
                 
             else:
                 ud_merit.loc[ud_merit['name'] == sel, 'color'] = '#7198c0'
+                rd_sum = sum(ud_merit['rd'].tolist())
+                
+                ud_merit['rd'] = 0
+                for idx, row in ud_merit.iterrows():
+                    if rd_sum >= row.Load:
+                        ud_merit.loc[idx,'rd'] = row.Load
+                        rd_sum -= row.Load
+                    else:
+                        ud_merit.loc[idx,'rd'] = rd_sum
+                        rd_sum = 0
+                print(ud_merit.head())
                 ud_price = ud_merit.red_bid[ud_merit.rd != 0].min()
              
                               
@@ -551,10 +592,10 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
     print()
     if type == 'gen':
         line_flow_end = mo_df[mo_df.node == 1]['prod'].sum()
-        text_box = f"The scenario results in a power flow of {line_flow_end} MW from Node 1 to Node 2 causing a redispatch demand of {rd_dem[0:-3]} MWh"
+        text_box_summary = f"The scenario results in a power flow of {line_flow_end} MW from Node 1 to Node 2 causing a redispatch demand of {rd_dem[0:-3]} MWh"
     else:
         line_flow_end = mo_df[mo_df.Node == 2]['power_receive'].sum()
-        text_box = f"The scenario results in a power flow of {line_flow_end} MW from Node 2 to Node 1 causing a redispatch demand of {rd_dem[0:-3]} MWh"
+        text_box_summary = f"The scenario results in a power flow of {line_flow_end} MW from Node 2 to Node 1 causing a redispatch demand of {rd_dem[0:-3]} MWh"
         
    
     
@@ -578,4 +619,4 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
     print("counter = ", counter)
     print("N_clicks = ",n_clicks)
     
-    return fig,  print_ud, print_dd, payoff_table,payoff_export_dataframe, cap_cons,strategy_box_text, text_box,style,style_1,sanction_output,counter,text_box
+    return fig,  print_ud, print_dd, payoff_table,payoff_export_dataframe, cap_cons,strategy_box_text, text_box,style,style_1,sanction_output,counter,text_box_summary

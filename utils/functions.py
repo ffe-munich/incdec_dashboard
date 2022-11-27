@@ -451,6 +451,7 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                 
  
     elif strat == 'Bayesian Equilibrium':  
+        mark = 0
         if type == 'gen':
             p = x.cost  
             l = x.cost
