@@ -12,7 +12,6 @@ from dash import Dash, dcc, html, Input, Output, callback, dash_table
 import base64
 
 import numpy as np
-import nashpy as nash
 from IPython.display import Image
 from utils.dynamic_plot import dynamic_plot
 img_1 = dynamic_plot()
