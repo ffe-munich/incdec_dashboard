@@ -9,7 +9,7 @@ from re import L
 import os
 from utils.plot import plot_function
 from utils.functions import redispatch_load as redispatch, payoffs, game, return_table
-import nashpy as nash
+# import nashpy as nash
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
