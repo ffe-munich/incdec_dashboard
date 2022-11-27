@@ -12,7 +12,7 @@ app = dash.Dash(
 
 PLOTLY_LOGO = "https://thumbs.dreamstime.com/b/slot-machine-jackpot-icon-casino-concept-dark-background-slot-machine-jackpot-icon-casino-concept-dark-background-simple-117459826.jpg"
 app.config['suppress_callback_exceptions'] = True
-
+server = app.server
 navbar = dbc.Navbar(
     dbc.Container(
         [
