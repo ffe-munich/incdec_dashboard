@@ -9,7 +9,7 @@ from re import L
 import os
 from utils.plot import plot_function
 from utils.functions import redispatch_load as redispatch, payoffs, game, return_table
-# import nashpy as nash
+import nashpy as nash
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -170,7 +170,7 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
 
 #    create merit order
     mo = input_df.sort_values(by='bid', ascending=False)
-
+    print("capacity_mw: ",capacity_mw)
     if anticipation == 'No Anticipation':
         bool_var = True
 
@@ -188,7 +188,6 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
         mo_df.sort_values(by='bid', inplace=True, ascending=False)
         clearing_price = mo_df.bid[mo_df.Load.cumsum() >= power_mw].max()
         production_line_flow = mo_df[mo_df.Node==2]['disp'].sum()
-        print("production_line_flow: ", production_line_flow)
         mo_df['left_to_receive'] = mo_df.Load- mo_df.disp
         mo_left_to_receive = mo_df[mo_df.left_to_receive > 0]
         mo_left_not_to_receive = mo_df[mo_df.disp>0]
@@ -204,7 +203,7 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
         
         
         
-        mo_df['real_WTP'] = mo_df['WTP']
+        mo_df['real_WTP'] = mo_df['WTP'].copy()
         mo_df['power_receive'] = mo_df.disp + mo_df.rd
         mo_df['payoff_without_anticipated'] = mo_df.apply(lambda x: payoffs(
             x, cp=clearing_price, udp=ud_price, ddp=dd_price, type='load' ,redispatch_pricing=redispatch_pricing), axis=1)
@@ -288,8 +287,10 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
                 cost.append(i[1])
                 real_cost.append(i[2])
                 mark.append(i[3])
-           
+            print(mo_df.head(6))
             mo_df['bid'],mo_df['WTP'],mo_df['real_WTP'],mo_df['mark'] = bid,cost,real_cost,mark
+            print(mo_df.head(6))
+            
             merit_order_df = mo_df
             
          
@@ -313,8 +314,7 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
         dd_merit = mo_2[mo_2.disp > 0]
         ud_merit = mo_1[mo_1.disp < mo_1.Load]
         mo_df = pd.concat([mo_1, mo_2])
-        print("After")
-        print(mo_df.head(6))
+        
         mo_df.sort_values(by='bid', inplace=True, ascending=False)
         clearing_price = mo_df.bid[mo_df.Load.cumsum() >= power_mw].max()
         mo_df['power_receive'] = mo_df.disp + mo_df.rd
@@ -371,8 +371,7 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
             l.append("<b>%{width}</b> MW at <br><b>%{y}</b> €/MWh")
     dd_merit.hover_template = l       
     l=[]
-    print("ud_merit")
-    print(ud_merit.head())
+   
     ud_merit = ud_merit.astype({'red_bid': 'int','WTP': 'int','pay_as_bid_red': 'int'})
     dd_merit = dd_merit.astype({'red_bid': 'int','WTP': 'int','pay_as_bid_red': 'int'})
     for i in ud_merit.iterrows():

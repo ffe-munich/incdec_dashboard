@@ -320,7 +320,9 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                 y = max(udp - 0.001, x_total)
             elif x.node == 1:
                 y = min(ddp + 0.001, x_total) 
-        elif (x.Game == True or x.Game =='true') and (not np.isnan(udp)) and type == 'load':
+                
+        elif (x.Game == True or x.Game =='true' or x.Game != 'false') and (not np.isnan(udp)) and type == 'load':
+            print(x.Game)
             x_total = x.WTP-markup
             
             if x.Node == 2:
@@ -331,10 +333,10 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
             if type == 'gen':
                 y = x.cost       
             else:
-                y = x.WTP
+                y = x.real_WTP
         if type == 'gen':        
             if math.isnan(udp):
-                print("udp is nan")
+                
                 count = 0
                 cond = False
                 l =x.cost
@@ -370,9 +372,7 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                             mo_left_for_down_disp =mo_left_for_down_disp.head(count)
                             break
                     sum_right_disp = mo_left_for_down_disp[mo_left_for_down_disp.node == 1]['disp'].sum() 
-                    print("sum_right_disp: ",sum_right_disp)
-                    print("production_line_flow: ", production_line_flow)
-                    print("x.cap: ", x.cap)
+                   
                     
                     if sum_right_disp == 0 and x.cap + production_line_flow > line_capacity:
                         cond = True
@@ -388,7 +388,7 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
             mo_left_to_receive = mo_left_for_disp
             mo_left_not_to_receive = mo_left_for_down_disp
             if math.isnan(udp):
-                print("udp is nan")
+            
                 count = 0
                 cond = False
                 l =x.WTP
@@ -413,7 +413,7 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                     elif sum_left_not_to_receive + production_line_flow > line_capacity:
                         cond = True                      
                         
-                    if x.Load < min_node_2_cost and cond:
+                    if x.Load < min_node_2_cost and cond and x.Game == 'true':
                         y = min_node_2_cost-0.001
                         l = min_node_2_cost - 0.001
                         mark = 1
@@ -427,12 +427,10 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                         if tmp <= 0:
                             mo_left_to_receive = mo_left_to_receive.head(count)
                             break
-                    print(mo_left_to_receive.head())
                     sum_right_disp = mo_left_to_receive[mo_left_to_receive.Node == 2]['left_to_receive'].sum() 
                     
-                    print("sum_right_disp: ",sum_right_disp)
-                    print("production_line_flow: ", production_line_flow)
-                    print("x.Load: ", x.Load)
+                    
+                    
                     if sum_right_disp == 0:
                         cond = False
                     elif sum_right_disp >= x.disp and x.disp + production_line_flow > line_capacity: 
@@ -442,7 +440,7 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                     else :
                         cond = False
                         
-                    if x.WTP > max_node_1_cost and cond:
+                    if x.WTP > max_node_1_cost and cond and x.Game == 'true':
                         y = max_node_1_cost+0.001
                         l = max_node_1_cost+0.001
                         mark = 1

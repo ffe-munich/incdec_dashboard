@@ -407,7 +407,7 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
             mo_df.loc[mo_df['name'] == sel, 'real_WTP'] = clearing_price
         
         mo_df['payoff_anticipated_strategy'] = mo_df.apply(lambda x: payoffs(x,cp=clearing_price,udp=ud_price,ddp=dd_price, type = board,redispatch_pricing=redispatch_pricing ),axis=1)
-        print(mo_df.head(6))
+        
         if sel in dd_merit['name'].tolist():
             
                                                                                               
@@ -595,7 +595,7 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
         text_box_summary = f"The scenario results in a power flow of {line_flow_end} MW from Node 1 to Node 2 causing a redispatch demand of {rd_dem[0:-3]} MWh"
     else:
         line_flow_end = mo_df[mo_df.Node == 2]['power_receive'].sum()
-        text_box_summary = f"The scenario results in a power flow of {line_flow_end} MW from Node 2 to Node 1 causing a redispatch demand of {rd_dem[0:-3]} MWh"
+        text_box_summary = f"The scenario results in a power flow of {line_flow_end} MW from Node 1 to Node 2 causing a redispatch demand of {rd_dem[0:-3]} MWh"
         
    
     
@@ -603,7 +603,7 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
     print_dd = ""       
     mo_df = mo_df.reset_index()  
     mo_df['payoff'] = mo_df['payoff'].map('{:,.2f}€'.format)
-    
+    print(mo_df.head(6))
     payoff_table =  mo_df[['name','payoff']].sort_values(by = 'name')
     payoff_table = payoff_table.set_index('name').transpose()
     payoff_table  = payoff_table.to_dict('records')
@@ -616,7 +616,6 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
     else:
         payoff_export_dataframe = pd.DataFrame()
         payoff_export_dataframe = payoff_export_dataframe.to_dict('records')
-    print("counter = ", counter)
-    print("N_clicks = ",n_clicks)
+    
     
     return fig,  print_ud, print_dd, payoff_table,payoff_export_dataframe, cap_cons,strategy_box_text, text_box,style,style_1,sanction_output,counter,text_box_summary
