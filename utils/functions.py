@@ -334,12 +334,12 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
             
             if x.Node == 2:
                 if x_total != ddp:  
-                    y = max(ddp - 0.001, x_total)
+                    y = max(ddp + 0.001, x_total)
                 else:
                     y = x_total
             elif x.Node == 1:
                 if x_total != udp:  
-                    y = min(udp + 0.001, x_total)
+                    y = min(udp - 0.001, x_total)
                 else:
                     y = x_total
         else:
