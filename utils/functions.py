@@ -254,7 +254,7 @@ def payoffs(x, cp, udp, ddp , type = 'gen', redispatch_pricing = 'uniform pricin
         y = -x.disp *cp - x.rd*ddp + x['power_receive'] * x.real_WTP
     
     elif x.rd < 0 and type == 'load' and redispatch_pricing == 'pay-as-bid':
-        y = x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP  
+        y = -x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP  
         
     
     elif x.rd == 0 and type == 'gen':
