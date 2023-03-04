@@ -1,10 +1,15 @@
+from pydoc import classname
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
 
+import dash
 import dash_daq as daq
 import dash_bootstrap_components as dbc
-
-from dash import  dcc, html, dash_table
+from dash.dependencies import Input, Output, State
+from dash import Dash, dcc, html, Input, Output, callback, dash_table
 import base64
-
 
 from utils.dynamic_plot import dynamic_plot
 img_1 = dynamic_plot()
@@ -287,15 +292,6 @@ def layout_func(table_1, table_2, payoff_table,payoff_record_table= None, type='
 def layout_func_home():
     
     id_dct = {}
-    
-    box_4_info = "Increase-Decrease Gaming (Inc-Dec gaming) is a form of strategic bidding behavior in the market-based procurement of grid-serving flexibility (market-based redispatch). The flexibility " \
-                        + "providers expect an advantageous price on the flexibility market and alter their bid on the spot market accordingly. Hence, they will exploit the parallel existence of spot market and " \
-                        + "flexibilty market for arbitrage opportunities. It is to be distinguished from market power and can also be performed by small, non-pivotal flexibiltiy providers. Among potential consequences " \
-                        + "are an aggravation and increasing number of grid congestions, high costs for the grid operator for flexibility procurement and undesirable incentives."         
-    
-    box_4_1_info = "In case of network congestion, redispatch is performed via seperate redispatch markets for node 1 (export constraint node) and node 2 (import constraint node)." 
-    box_4_2_info = "While the export constraint node requires a reduction (downdispatch) of feed-in or an increase (updispatch) of load, for the import constraint node, the signs are reversed." 
-    
     heading_dash = "Background Info"  
     background_info = "This dashboard is an interactive tool for the analysis and intuitive visualization of the incentives for inc-dec gaming under different scenarios. Theryby, different mitigation" \
                         + " strategies and two redispatch pricing mechanisms can be tested in a generator's dashboard and a load dashboard, representing the behavior of flexible generators or flexible loads."  
@@ -319,66 +315,35 @@ def layout_func_home():
             dbc.Col([
                     
                     html.Div(dbc.Row([
-                    dbc.Col([dbc.Row([dbc.Col(
-                        [html.Br(), 
-                          html.Img(src= "./assets/col_1.PNG", style={'height':'80%', 'width':'85%', 'text-align':'center' })],width= 5),
-                                      dbc.Col([
-                    
-                    dbc.Row([dbc.Col(html.Img(src= "./assets/col_1_3.PNG", style={'height':'40%', 'width':'100%', 'text-align':'center' }),width = 1),
-                             dbc.Col([html.P("There are two nodes with generators on both and a load on the second node (generators dashboard)/loads on both and a generator on the first node(load dashboard)"),html.Br(),
-                   ]),
-                    ]),
-                   
-                     dbc.Row([dbc.Col(html.Img(src= "./assets/col_1_4.PNG", style={'height':'80%', 'width':'100%', 'text-align':'center' }),width = 1),
-                             dbc.Col([html.P("Between the nodes there is a limited transmission capacity                                                                                                      "),html.Br(),
-                   ]),
-                    ]),
-                    
-                     dbc.Row([dbc.Col(html.Img(src= "./assets/col_1_5.PNG", style={'height':'60%', 'width':'100%', 'text-align':'center' }),width = 1),
-                             dbc.Col([html.P("Electricity trading happens via a central market mechanism on the spot market"),html.Br(),
-                   ]),
-                    ])],align="center")],className='table-2-1'),
+                    dbc.Col([dbc.Row([
+                    html.Br(),
+                    html.P("1st box")],className='table-2-1'),
                              
                         html.Br(),
                             
-                        dbc.Row( [
-                    dbc.Col([dbc.Row(html.Br()),dbc.Row(html.Br()),dbc.Row(html.Div("Anticipation")),dbc.Row(html.Div(""))],width = 2),
-                    dbc.Col([dbc.Row(html.Img(src= "./assets/Row_2_1.PNG", style={'height':'60%', 'width':'60%', 'text-align':'center' })),dbc.Row(html.Br()),dbc.Row(html.Img(src= "./assets/Row_2_2.PNG", style={'height':'60%', 'width':'60%', 'text-align':'center' })),dbc.Row(html.Br()),dbc.Row(html.Img(src= "./assets/Row_2_3.PNG", style={'height':'60%', 'width':'60%', 'text-align':'center' }))],width = 1),
-                    dbc.Col([dbc.Row(html.Div("None: All actors bid marginal costs on all market (no bidding strategy)")),dbc.Row(html.Br()),dbc.Row(html.Div("Full Anticipation: Bidders bid their profit maximizing bid on the spot market anticipating the redispatch price")),dbc.Row(html.Br()),dbc.Row(html.Div("Bayesian Equilibrium: Depiction of the long-term equilibrium"))], width=8),
-                                ],className='text-dd'),
+                        dbc.Row([html.P("2nd box")],className='text-dd'),
                             
                         html.Br(),
                         
                         
                         dbc.Row([
-                    dbc.Col([dbc.Row(html.Br()),dbc.Row(html.Br()),dbc.Row(html.Div("Dashboard Functionalities")),dbc.Row(html.Div(""))],width = 2),
-                    dbc.Col([dbc.Row(html.Img(src= "./assets/Row_3_1.PNG", style={'height':'60%', 'width':'60%', 'text-align':'center' })),dbc.Row(html.Br()),dbc.Row(html.Br()),dbc.Row(html.Br()),dbc.Row(html.Img(src= "./assets/Row_3_2.PNG", style={'height':'60%', 'width':'60%', 'text-align':'center' }))],width = 1),
-                    dbc.Col([dbc.Row(html.Div("Freeze-bids button: Fixes all actors bids and enables to change the input situation, to depict risk by showing the results of false forecasting of a situation (e.g changes generation/load, change of transmission capacity available)")),dbc.Row(html.Br()),dbc.Row(html.Div("Save results: Save the actors payoffs, the network operator costs and the network congestion to an excel file, for direct comparison of different inputs"))], width=8),
-                                ], className = 'text-dd'),
+                        dbc.Col([html.H5("Payoff Table"),
+                         ])], className = 'table-2-1'),
                         
                         html.Br(),
                         
-                        dbc.Row([
-                    dbc.Col([dbc.Row(html.Br()),dbc.Row(html.Br()),dbc.Row(html.Br()),dbc.Row(html.Br()),dbc.Row(html.Div("Mitigation Strategies")),dbc.Row(html.Div(""))],width = 2),
-                    dbc.Col([dbc.Row(html.Img(src= "./assets/Row_4_1.PNG", style={'height':'60%', 'width':'60%', 'text-align':'center' })),dbc.Row(html.Br()),dbc.Row(html.Br()),dbc.Row(html.Img(src= "./assets/Row_4_2.PNG", style={'height':'60%', 'width':'60%', 'text-align':'center' })),dbc.Row(html.Br()),dbc.Row(html.Br()),dbc.Row(html.Img(src= "./assets/Row_4_3.PNG", style={'height':'60%', 'width':'60%', 'text-align':'center' }))],width = 1),
-                    dbc.Col([dbc.Row(html.Div("1-Statistic Non-Attribution: To increase the risk of inc-dec gaming, actors are not distributed randomly on the redispatch market, even if thei lies below the bid of their customers")),dbc.Row(html.Br()),dbc.Row(html.Div("2-Monitoring and Sanctions: Systematic deviations in times of network congestions are monitored. They are detected with a probability p and in this case sanctioned with a sanction of XX")),dbc.Row(html.Br()),dbc.Row(html.Div("3-Capacity Pricing: One or more actors can be selected, who are not remunerated directly for a change in power flows but receive a fixed compensation for the provision of their flexibilty for a certain time period. When they are redispatched, they are compensated by the spot market price in case of updispatch/need to pay the spot market price in case of downdispatch"))], width=8),
-                                ],className='text-dd'),
+                        dbc.Row([   html.H5("3rd box"),],className='text-dd'),
                         
                        
                             
                     ]),
                     
-                    dbc.Col([html.Div(dbc.Row([html.P( box_4_info),html.Br(),html.Img(src= "./assets/col_1_6.PNG", style={'height':'80%', 'width':'85%', 'text-align':'center' }),html.Br(),html.Br(),dbc.Row(html.Br()),dbc.Row([dbc.Col(html.Img(src= "./assets/box_5.PNG", style={'height':'80%', 'width':'100%', 'text-align':'center' }),width = 1),dbc.Col([html.P( box_4_1_info),html.P( box_4_2_info)])])]), className = 'text-dd'),
+                    dbc.Col([html.Div(dbc.Row(html.H5("4th box")), className = 'text-dd'),
                               html.Br(),
-                             html.Div([ html.P("Inc-Dec gaming results in higher redispatch demand, higher redispatch costs, and generates windfall profits for the strategic bidders")], className='text-dd')
-                             ,html.Br()
-                             ,html.P("Try out the interactive dashboards here:")
-                             ,html.Br()
-                             ,html.A('Dashboard for Generators',href = "http://127.0.0.1:8050/generators-dashboard")
-                              ,html.Br()
-                             ,html.A('Dashboard for Loads',href = "http://127.0.0.1:8050/load-dashboard")
-                             ]),
-                    
+                             html.Div([ html.H5("5th box")], className='text-dd')
+                             
+                             ])
+
                     ],align="start"), className= 'main_layout'), 
                 
                     ]),

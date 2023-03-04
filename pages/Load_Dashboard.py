@@ -39,7 +39,7 @@ color_dict = {"1B": "#356CA5", "2C": "#F7D507", "1D": "#8AB5E1",
               "3A": "#7A1C1C"}
 merit_order_df = 0
 input_data = {'Load': [3, 3, 3, 3, 3, 3],  # production capacities of generators
-              'WTP': [35, 10, 40, 30, 45, 50],  # marginal costs of generators
+              'WTP': [90, 60, 40, 30, 45, 50],  # marginal costs of generators
               # generator location (1: export costr. node; 2: import constr. node)
               'Node': [1, 1, 1, 2, 2, 2],
               'Game': [True, True, True, True, True, True]}  # Allow, or forbid strategic bidding
@@ -169,7 +169,7 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
 
 #    create merit order
     mo = input_df.sort_values(by='bid', ascending=False)
-    print("capacity_mw: ",capacity_mw)
+
     if anticipation == 'No Anticipation':
         bool_var = True
 
@@ -183,29 +183,36 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
         dd_merit = mo_2[mo_2.disp > 0]
         ud_merit = mo_1[mo_1.disp < mo_1.Load]
         mo_df = pd.concat([mo_1, mo_2])
-
+        
         mo_df.sort_values(by='bid', inplace=True, ascending=False)
         clearing_price = mo_df.bid[mo_df.Load.cumsum() >= power_mw].max()
         production_line_flow = mo_df[mo_df.Node==2]['disp'].sum()
+        print("production_line_flow: ", production_line_flow)
         mo_df['left_to_receive'] = mo_df.Load- mo_df.disp
         mo_left_to_receive = mo_df[mo_df.left_to_receive > 0]
         mo_left_not_to_receive = mo_df[mo_df.disp>0]
         
         
         min_node_2_cost = mo_df[mo_df.Node == 2]
-        min_node_2_cost = min_node_2_cost[min_node_2_cost.disp !=0]  
-        min_node_2_cost = min_node_2_cost.iloc[-1, min_node_2_cost.columns.get_loc('bid')]
+        min_node_2_cost = min_node_2_cost[min_node_2_cost.disp !=0] 
+        try: 
+            min_node_2_cost = min_node_2_cost.iloc[-1, min_node_2_cost.columns.get_loc('bid')]
+        except:
+            min_node_2_cost = 0
           
         max_node_1_cost = mo_df[mo_df.Node==1]
         max_node_1_cost = max_node_1_cost[max_node_1_cost.disp< max_node_1_cost.Load]
-        max_node_1_cost = max_node_1_cost.iloc[0, max_node_1_cost.columns.get_loc('bid')]   
+        try:
+            max_node_1_cost = max_node_1_cost.iloc[0, max_node_1_cost.columns.get_loc('bid')]   
+        except:
+            max_node_1_cost = 0
         
         
         
         mo_df['real_WTP'] = mo_df['WTP'].copy()
         mo_df['power_receive'] = mo_df.disp + mo_df.rd
         mo_df['payoff_without_anticipated'] = mo_df.apply(lambda x: payoffs(
-            x, cp=clearing_price, udp=ud_price, ddp=dd_price, type='load' ,redispatch_pricing=redispatch_pricing), axis=1)
+            x, cp=clearing_price, udp=ud_price, ddp=dd_price, type='load' ,redispatch_pricing=redispatch_pricing,sel = None,capacity_pricing = False), axis=1)
         
         d = {} 
         
@@ -286,10 +293,8 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
                 cost.append(i[1])
                 real_cost.append(i[2])
                 mark.append(i[3])
-            print(mo_df.head(6))
+           
             mo_df['bid'],mo_df['WTP'],mo_df['real_WTP'],mo_df['mark'] = bid,cost,real_cost,mark
-            print(mo_df.head(6))
-            
             merit_order_df = mo_df
             
          
@@ -313,12 +318,13 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
         dd_merit = mo_2[mo_2.disp > 0]
         ud_merit = mo_1[mo_1.disp < mo_1.Load]
         mo_df = pd.concat([mo_1, mo_2])
-        
+        # print("After")
+        # print(mo_df.head(6))
         mo_df.sort_values(by='bid', inplace=True, ascending=False)
         clearing_price = mo_df.bid[mo_df.Load.cumsum() >= power_mw].max()
         mo_df['power_receive'] = mo_df.disp + mo_df.rd
         mo_df['payoff_anticipated'] = mo_df.apply(lambda x: payoffs(
-            x, cp=clearing_price, udp=ud_price, ddp=dd_price, type='load', redispatch_pricing=redispatch_pricing), axis=1)
+            x, cp=clearing_price, udp=ud_price, ddp=dd_price, type='load', redispatch_pricing=redispatch_pricing,sel = None,capacity_pricing = False), axis=1)
 
         
         mo_df_dup = mo_df.reset_index()
@@ -370,7 +376,8 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
             l.append("<b>%{width}</b> MW at <br><b>%{y}</b> €/MWh")
     dd_merit.hover_template = l       
     l=[]
-   
+    # print("ud_merit")
+    # print(ud_merit.head())
     ud_merit = ud_merit.astype({'red_bid': 'int','WTP': 'int','pay_as_bid_red': 'int'})
     dd_merit = dd_merit.astype({'red_bid': 'int','WTP': 'int','pay_as_bid_red': 'int'})
     for i in ud_merit.iterrows():
@@ -442,26 +449,11 @@ def strategies_select(load_sel, strategy, capacity_mw, mo_df, mo, dd_merit, ud_m
     Input(component_id='new_table-2', component_property='data'),
     Input(component_id='strategy-2', component_property='value'),)
 def add_select_options(data,strategy_sel):
-    
-    if strategy_sel != 'Stochastic Non-Attribution':
-        data = pd.DataFrame(data)
-        if data.empty:
-            data = pd.DataFrame(columns=['Name'])
-    
-        col_name = data.Name.tolist()
- 
-    else:
-        data = pd.DataFrame(data)
-        if data.empty:
-            data = pd.DataFrame(columns=['Name'])
-        
-        
-        col_name = data[data.rd != 0].Name.tolist()
-        
-        
-        
-    
-    dict_select =[{'label': 'None', 'value': None}] + [{'label': i, 'value': i} for i in col_name] 
+    data = pd.DataFrame(data)
+    if data.empty:
+        data = pd.DataFrame(columns=['Name'])
+    dict_select = [{'label': 'None', 'value': None}] + \
+        [{'label': i, 'value': i.split('(')[0]} for i in data.Name.tolist()]
     return dict_select
 
 

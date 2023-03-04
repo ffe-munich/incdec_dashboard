@@ -1,9 +1,7 @@
 import dash
-import os
 import dash_bootstrap_components as dbc
 from dash import html, dcc
-# import os
-# os.environ["PYON_VERSION"] = "3.9.0"
+
 
 app = dash.Dash(
     __name__,  external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True
@@ -12,7 +10,6 @@ app = dash.Dash(
 
 PLOTLY_LOGO = "https://thumbs.dreamstime.com/b/slot-machine-jackpot-icon-casino-concept-dark-background-slot-machine-jackpot-icon-casino-concept-dark-background-simple-117459826.jpg"
 app.config['suppress_callback_exceptions'] = True
-server = app.server
 
 navbar = dbc.Navbar(
     dbc.Container(

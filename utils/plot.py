@@ -99,12 +99,15 @@ def plot_function(mo_df,mo,dd_merit,ud_merit,ud_price,dd_price,clearing_price,rd
     if ud_merit_cap_sum < ud_merit['cap'].sum():
         ud_merit_cap_sum = ud_merit['cap'].sum()       
      
-            
+    if  dd_merit_plot.disp.empty:
+        wid = 0
+    else:
+        wid = dd_merit_plot.disp
     # add subplot for downdispatch
     fig.add_trace(go.Bar(
         x = dd_merit_plot.disp.cumsum() - 0.5*dd_merit_plot.disp,
         y = dd_merit_plot.red_bid,
-        width = dd_merit_plot.disp,
+        width = wid,
         text = dd_merit_plot.index,
         hovertemplate = dd_merit_plot.hover_template,
         name = node_var,

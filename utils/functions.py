@@ -223,7 +223,7 @@ def redispatch_load(mo,power,line_cap, pay_as_bid= "uniform pricing",freeze_bool
 
 
 
-def payoffs(x, cp, udp, ddp , type = 'gen', redispatch_pricing = 'uniform pricing'):
+def payoffs(x, cp, udp, ddp , type = 'gen', redispatch_pricing = 'uniform pricing', sel = None,capacity_pricing = False):
     '''
     calculates payoffs 
     
@@ -245,36 +245,109 @@ def payoffs(x, cp, udp, ddp , type = 'gen', redispatch_pricing = 'uniform pricin
 
     '''
     # print(x)
-    if x.rd < 0 and type == 'gen' and redispatch_pricing == 'uniform pricing':
-        y = x.disp * cp + x.rd*ddp - x['prod']*x.real_cost  
-    elif x.rd < 0 and type == 'gen' and redispatch_pricing == 'pay-as-bid':
-        y = x.disp * cp + x.rd*x.red_bid - x['prod']*x.real_cost  
-        
-    elif x.rd < 0 and type == 'load' and redispatch_pricing == 'uniform pricing':
-        y = -x.disp *cp - x.rd*ddp + x['power_receive'] * x.real_WTP
-    
-    elif x.rd < 0 and type == 'load' and redispatch_pricing == 'pay-as-bid':
-        y = -x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP  
-        
-    
-    elif x.rd == 0 and type == 'gen':
-        y = x.disp * cp - x['prod']*x.real_cost  
-        
-    elif x.rd == 0 and type == 'load':
-        y = - x.disp *cp + x['power_receive'] * x.real_WTP
-                
-        
-    elif type == 'gen' and redispatch_pricing == 'uniform pricing':
-        y = x.disp * cp + x.rd*udp - x['prod']*x.real_cost
-           
-    elif type == 'gen' and redispatch_pricing == 'pay-as-bid':
-        y = x.disp * cp + x.rd*x.red_bid - x['prod']*x.real_cost
-        
-    elif type == 'load' and redispatch_pricing == 'uniform pricing':
-        y = -x.disp * cp - x.rd*udp + x['power_receive']*x.real_WTP  
+    if capacity_pricing == False:
+        if x.rd < 0 and type == 'gen' and redispatch_pricing == 'uniform pricing':
+            y = x.disp * cp + x.rd*ddp - x['prod']*x.real_cost  
+        elif x.rd < 0 and type == 'gen' and redispatch_pricing == 'pay-as-bid':
+            y = x.disp * cp + x.rd*x.red_bid - x['prod']*x.real_cost  
             
-    else: 
-        y = -x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP  
+        elif x.rd < 0 and type == 'load' and redispatch_pricing == 'uniform pricing':
+            
+            y = -x.disp *cp - x.rd*ddp + x['power_receive'] * x.real_WTP
+        
+        elif x.rd < 0 and type == 'load' and redispatch_pricing == 'pay-as-bid':
+            y = -x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP  
+            
+        
+        elif x.rd == 0 and type == 'gen':
+            y = x.disp * cp - x['prod']*x.real_cost  
+            
+        elif x.rd == 0 and type == 'load':
+            # print(f"{x.name} x.disp {x.disp} x.real_WTP {x.real_WTP}")
+            y = - x.disp *cp + x['power_receive'] * x.real_WTP
+                    
+            
+        elif type == 'gen' and redispatch_pricing == 'uniform pricing':
+            y = x.disp * cp + x.rd*udp - x['prod']*x.real_cost
+            
+        elif type == 'gen' and redispatch_pricing == 'pay-as-bid':
+            y = x.disp * cp + x.rd*x.red_bid - x['prod']*x.real_cost
+            
+        elif type == 'load' and redispatch_pricing == 'uniform pricing':
+            y = -x.disp * cp - x.rd*udp + x['power_receive']*x.real_WTP  
+                
+        else: 
+            y = -x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP  
+        
+    else:
+        if sel:
+            if x.rd < 0 and type == 'gen' and redispatch_pricing == 'uniform pricing':
+                y = x.disp * cp + x.rd*x.real_cost - x['prod']*x.real_cost  
+            elif x.rd < 0 and type == 'gen' and redispatch_pricing == 'pay-as-bid':
+                y = x.disp * cp + x.rd*x.red_bid - x['prod']*x.real_cost  
+                
+            elif x.rd < 0 and type == 'load' and redispatch_pricing == 'uniform pricing':
+                
+                y = -x.disp *cp - x.rd* x.real_WTP + x['power_receive'] * x.real_WTP
+            
+            elif x.rd < 0 and type == 'load' and redispatch_pricing == 'pay-as-bid':
+                y = x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP  
+                
+            
+            elif x.rd == 0 and type == 'gen':
+                y = x.disp * cp - x['prod']*x.real_cost  
+                
+            elif x.rd == 0 and type == 'load':
+                # print(f"{x.name} x.disp {x.disp} x.real_WTP {x.real_WTP}")
+                y = - x.disp *cp + x['power_receive'] * x.real_WTP
+                        
+                
+            elif type == 'gen' and redispatch_pricing == 'uniform pricing':
+                y = x.disp * cp + x.rd*x.real_cost - x['prod']*x.real_cost
+                
+            elif type == 'gen' and redispatch_pricing == 'pay-as-bid':
+                y = x.disp * cp + x.rd*x.red_bid - x['prod']*x.real_cost
+                
+            elif type == 'load' and redispatch_pricing == 'uniform pricing':
+                y = -x.disp * cp - x.rd*x.real_WTP  + x['power_receive']*x.real_WTP  
+                    
+            else: 
+                y = -x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP
+        
+        else:
+            if x.rd < 0 and type == 'gen' and redispatch_pricing == 'uniform pricing':
+                y = x.disp * cp + x.rd*ddp - x['prod']*x.real_cost  
+            elif x.rd < 0 and type == 'gen' and redispatch_pricing == 'pay-as-bid':
+                y = x.disp * cp + x.rd*x.red_bid - x['prod']*x.real_cost  
+                
+            elif x.rd < 0 and type == 'load' and redispatch_pricing == 'uniform pricing':
+                
+                y = -x.disp *cp - x.rd*ddp + x['power_receive'] * x.real_WTP
+            
+            elif x.rd < 0 and type == 'load' and redispatch_pricing == 'pay-as-bid':
+                y = x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP  
+                
+            
+            elif x.rd == 0 and type == 'gen':
+                y = x.disp * cp - x['prod']*x.real_cost  
+                
+            elif x.rd == 0 and type == 'load':
+                # print(f"{x.name} x.disp {x.disp} x.real_WTP {x.real_WTP}")
+                y = - x.disp *cp + x['power_receive'] * x.real_WTP
+                        
+                
+            elif type == 'gen' and redispatch_pricing == 'uniform pricing':
+                y = x.disp * cp + x.rd*udp - x['prod']*x.real_cost
+                
+            elif type == 'gen' and redispatch_pricing == 'pay-as-bid':
+                y = x.disp * cp + x.rd*x.red_bid - x['prod']*x.real_cost
+                
+            elif type == 'load' and redispatch_pricing == 'uniform pricing':
+                y = -x.disp * cp - x.rd*udp + x['power_receive']*x.real_WTP  
+                    
+            else: 
+                y = -x.disp * cp - x.rd*x.red_bid + x['power_receive']*x.real_WTP
+        
         
     return round(y,2)
     
@@ -317,39 +390,24 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
             x_total = x.cost+markup
             
             if x.node == 2:
-                if x_total != udp: 
-                    y = max(udp + 0.001, x_total)
-                else:
-                    y = x_total
+                y = max(udp - 0.001, x_total)
             elif x.node == 1:
-                if x_total != ddp: 
-                    y = min(ddp - 0.001, x_total) 
-                
-                else:
-                    y = x_total
-                
-        elif (x.Game == True or x.Game =='true' or x.Game != 'false') and (not np.isnan(udp)) and type == 'load':
-            print(x.Game)
-            x_total = x.WTP+markup
+                y = min(ddp + 0.001, x_total) 
+        elif (x.Game == True or x.Game =='true') and (not np.isnan(udp)) and type == 'load':
+            x_total = x.WTP-markup
             
             if x.Node == 2:
-                if x_total != ddp:  
-                    y = max(ddp + 0.001, x_total)
-                else:
-                    y = x_total
+                y = max(ddp - 0.001, x_total)
             elif x.Node == 1:
-                if x_total != udp:  
-                    y = min(udp - 0.001, x_total)
-                else:
-                    y = x_total
+                y = min(udp + 0.001, x_total)
         else:
             if type == 'gen':
                 y = x.cost       
             else:
-                y = x.real_WTP
+                y = x.WTP
         if type == 'gen':        
             if math.isnan(udp):
-                
+                print("udp is nan")
                 count = 0
                 cond = False
                 l =x.cost
@@ -401,7 +459,7 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
             mo_left_to_receive = mo_left_for_disp
             mo_left_not_to_receive = mo_left_for_down_disp
             if math.isnan(udp):
-            
+                print("udp is nan")
                 count = 0
                 cond = False
                 l =x.WTP
@@ -426,7 +484,7 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                     elif sum_left_not_to_receive + production_line_flow > line_capacity:
                         cond = True                      
                         
-                    if x.Load < min_node_2_cost and cond and x.Game == 'true':
+                    if x.Load < min_node_2_cost and cond:
                         y = min_node_2_cost-0.001
                         l = min_node_2_cost - 0.001
                         mark = 1
@@ -440,10 +498,10 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                         if tmp <= 0:
                             mo_left_to_receive = mo_left_to_receive.head(count)
                             break
+                    
                     sum_right_disp = mo_left_to_receive[mo_left_to_receive.Node == 2]['left_to_receive'].sum() 
                     
-                    
-                    
+                  
                     if sum_right_disp == 0:
                         cond = False
                     elif sum_right_disp >= x.disp and x.disp + production_line_flow > line_capacity: 
@@ -453,7 +511,7 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                     else :
                         cond = False
                         
-                    if x.WTP > max_node_1_cost and cond and x.Game == 'true':
+                    if x.WTP > max_node_1_cost and cond:
                         y = max_node_1_cost+0.001
                         l = max_node_1_cost+0.001
                         mark = 1
@@ -462,7 +520,6 @@ def game(x,mo_left_for_disp,mo_left_for_down_disp,max_node_1_cost,min_node_2_cos
                 
  
     elif strat == 'Bayesian Equilibrium':  
-        mark = 0
         if type == 'gen':
             p = x.cost  
             l = x.cost

@@ -12,6 +12,6 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash import Dash, dcc, html, Input, Output, callback
 
-dash.register_page(__name__, path='/')
+# dash.register_page(__name__, path='/')
 
 layout = layout_func()

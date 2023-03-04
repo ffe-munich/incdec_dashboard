@@ -17,16 +17,14 @@ import plotly.express as px
 import dash
 import os
 import dash_bootstrap_components as dbc
-from regex import D
 from sklearn.manifold import trustworthiness
-from sqlalchemy import true
 from utils.layout import layout_func
 from utils.strategies import strategies_sel
 from dash.dependencies import Input, Output, State
 from dash import Dash, dcc, html, Input, Output, callback
 
 # app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-dash.register_page(__name__)
+dash.register_page(__name__,path='/')
 
 import numpy as np
 from utils.functions import redispatch, payoffs, game, return_table
@@ -44,7 +42,12 @@ input_data = {'cap': [3,3,3,3,3,3], # production capacities of generators
               'node': [1,1,1,2,2,2], # generator location (1: export costr. node; 2: import constr. node)
               'Game': [True,True,True,True,True,True]} # Allow, or forbid strategic bidding
 
-# markups to set bids above marginal costs
+
+# input_data = {'cap': [2.5,2.5,2.5,2.5], # production capacities of generators
+#                 'cost': [25,41.666667,58.333,75.0], # marginal costs of generators
+#                 'node': [2,2,1,1], # generator location (1: export costr. node; 2: import constr. node)
+#                 'Game': [True,True,True,True]}
+
 markup = 0
 type = 'gen'
 
@@ -189,16 +192,23 @@ def update_graph(data1, columns1, data2, columns2, load_mw, capacity_mw, anticip
         production_line_flow = mo_df[mo_df.node==1]['disp'].sum()
         
         min_node_2_cost = mo_df[mo_df.node==2]
+        print(min_node_2_cost.head())
         
         min_node_2_cost = min_node_2_cost[min_node_2_cost.disp==0]
-        min_node_2_cost = min_node_2_cost.iloc[0, min_node_2_cost.columns.get_loc('bid')]
+        try:
+            min_node_2_cost = min_node_2_cost.iloc[0, min_node_2_cost.columns.get_loc('bid')]
+        except:
+            min_node_2_cost = 0
         max_node_1_cost = mo_df[mo_df.node==1]
         max_node_1_cost = max_node_1_cost[max_node_1_cost.disp!=0]
-        max_node_1_cost = max_node_1_cost.iloc[-1, max_node_1_cost.columns.get_loc('bid')]
+        try:
+            max_node_1_cost = max_node_1_cost.iloc[-1, max_node_1_cost.columns.get_loc('bid')]
+        except:
+            max_node_1_cost = 0
        
         mo_df['real_cost'] = mo_df['cost']
         mo_df['prod'] = mo_df.disp + mo_df.rd
-        mo_df['payoff_without_anticipated'] = mo_df.apply(lambda x: payoffs(x,cp=clearing_price,udp=ud_price,ddp=dd_price, type = 'gen',redispatch_pricing = redispatch_pricing),axis=1)
+        mo_df['payoff_without_anticipated'] = mo_df.apply(lambda x: payoffs(x,cp=clearing_price,udp=ud_price,ddp=dd_price, type = 'gen',redispatch_pricing = redispatch_pricing,sel = None,capacity_pricing = False),axis=1)
         x= mo_df['payoff_without_anticipated']
         
     
@@ -257,9 +267,7 @@ def update_graph(data1, columns1, data2, columns2, load_mw, capacity_mw, anticip
                 c = c + 1
     
     freeze_bool = '{}'.format(on_freeze)
-    
-    print("before_anticipation")
-    print(mo_df.head(6))
+
     # adjust bids strategically if anticipation is true
     if anticipation != 'No Anticipation':
     
@@ -293,7 +301,7 @@ def update_graph(data1, columns1, data2, columns2, load_mw, capacity_mw, anticip
         #     mo_df['bid'] = mo_df['red_bid'] 
         
         mo_df.sort_values(by='bid',inplace=True)
-        print(mo_df.head(6))
+       
         mo_df['cap'] = mo['cap']
         # mo_df['cost'] = mo['cost']
         mo_df['Game'] = mo['Game']
@@ -310,7 +318,7 @@ def update_graph(data1, columns1, data2, columns2, load_mw, capacity_mw, anticip
         mo_df.sort_values(by='bid', inplace=True)
         clearing_price= mo_df.bid[mo_df.cap.cumsum()>=load_mw].min()
         mo_df['prod'] = mo_df.disp + mo_df.rd
-        mo_df['payoff_anticipated'] = mo_df.apply(lambda x: payoffs(x,cp=clearing_price,udp=ud_price,ddp=dd_price, type = 'gen', redispatch_pricing=redispatch_pricing),axis=1)
+        mo_df['payoff_anticipated'] = mo_df.apply(lambda x: payoffs(x,cp=clearing_price,udp=ud_price,ddp=dd_price, type = 'gen', redispatch_pricing=redispatch_pricing,sel = None,capacity_pricing = False),axis=1)
         
         mo_df_dup = mo_df.reset_index()
         mo_df_dup = mo_df_dup.sort_values('name')
@@ -356,7 +364,8 @@ def update_graph(data1, columns1, data2, columns2, load_mw, capacity_mw, anticip
     mo.reset_index(inplace=True)
     dd_merit.reset_index(inplace= True)
     ud_merit.reset_index(inplace = True)
-    
+    print("ud_merit")
+    print(ud_merit.head())
     ud_merit = ud_merit.astype({'red_bid': 'int','cost': 'int','red_bid': 'int'})
     dd_merit = dd_merit.astype({'red_bid': 'int','cost': 'int','red_bid': 'int'})
     sum_amount_with_strategy  = rd_dem * ud_price -  rd_dem * dd_price
@@ -382,20 +391,18 @@ def update_graph(data1, columns1, data2, columns2, load_mw, capacity_mw, anticip
     Input(component_id='strategy', component_property='value'),)
 def add_select_options(data,strategy_sel):
     
-    if strategy_sel != 'Stochastic Non-Attribution':
-        data = pd.DataFrame(data)
-        if data.empty:
-            data = pd.DataFrame(columns=['name'])
-        col_name = data.name.tolist()
-    
-    else:
-        data = pd.DataFrame(data)
-        if data.empty:
-            data = pd.DataFrame(columns=['name'])
-        col_name = data[data.rd != 0].name.tolist()
-        
-        
-        
+    data = pd.DataFrame(data)
+    if data.empty:
+        data = pd.DataFrame(columns=['name'])
+   
+    # col_name = [i.split('(')[0] for i in data.name.tolist()]
+    col_name = data.name.tolist()
+    # combinations = []
+    # for r in range(len(col_name)+1):
+    #     for combination in itertools.combinations(col_name, r):
+    #         combinations.append(combination)
+            
+    # print(combinations)
     
     dict_select =[{'label': 'None', 'value': None}] + [{'label': i, 'value': i} for i in col_name] 
     return dict_select
@@ -441,7 +448,7 @@ def strategies_select(gen_sel, strategy,load_mw, mo_df, mo, dd_merit,ud_merit, r
     
     global counter
     counter = counter
-    fig,  print_ud, print_dd, payoff_table, payoff_export_dataframe,cap_cons,strategy_box_text,text_box, style,style_1,sanction_output,counter,text_summary_box = strategies_sel(gen_sel, strategy,load_mw, mo_df, mo, dd_merit,ud_merit, rd_dem, clearing_price,capacity_mw,sum_amount_without_strategy, sanction,n_clicks,counter,anticipation, 'gen', redispatch_pricing= redispatch_pricing)
+    fig,  print_ud, print_dd, payoff_table, payoff_export_dataframe,cap_cons,strategy_box_text,text_box, style,style_1,sanction_output,counter,text_summary_box = strategies_sel(gen_sel, strategy,load_mw, mo_df, mo, dd_merit,ud_merit, rd_dem, clearing_price,capacity_mw,sum_amount_without_strategy, sanction,n_clicks,counter,anticipation, 'gen', redispatch_pricing= redispatch_pricing,return_dataframe=False)
     
     return fig,  print_ud, print_dd, payoff_table,payoff_export_dataframe,cap_cons,strategy_box_text,text_box,style,style_1,sanction_output,text_summary_box
 # callback to edit table at node 1
