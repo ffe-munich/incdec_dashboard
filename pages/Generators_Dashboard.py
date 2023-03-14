@@ -53,6 +53,7 @@ type = 'gen'
 
 # generate input dataframe
 input_df = pd.DataFrame(input_data)
+input_df  = input_df.replace(0, 0.0001)
 input_df['name'] = [f"G{i+1}" for i in range(len(input_df))]
 
 # create dataframes for both nodes

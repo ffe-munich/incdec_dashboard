@@ -20,6 +20,8 @@ def generator_main(input_data,anticipation,bool_var,merit_order_df,load_mw,capac
     
     # generate input dataframe
     input_df = pd.DataFrame(input_data)
+    input_df  = input_df.replace(0, 0.0001)
+
     input_df['name'] = [f"G{i+1}" for i in range(len(input_df))]
     
     
@@ -214,7 +216,7 @@ def generator_main(input_data,anticipation,bool_var,merit_order_df,load_mw,capac
     dd_merit['color'] = "#356CA5"
     ud_merit['color'] = "#EC9302"
     # print(mo_final.head())
-    mul = mo_df['bid'] * mo_df['disp']
+    mul = clearing_price * mo_df['disp']
     spot = mul.sum()
     
     sum_amount_without_strategy = sum_amount_with_strategy
@@ -249,9 +251,9 @@ def generator_main(input_data,anticipation,bool_var,merit_order_df,load_mw,capac
     if anticipation == 'No Anticipation':
         strategy = None
         gen_sel = None
-    system_characteristics_data = pd.DataFrame(columns=['Load','Line Capacity','Line Flow','Anticipation','Pricing Mechanism','Redispatch Demand','Redispatch Costs','Total Energy Payments','Strategy','Player Selected for Strategy'])
+    system_characteristics_data = pd.DataFrame(columns=['Load','Line Capacity','Line Flow','Clearing Price','Anticipation','Pricing Mechanism','Redispatch Demand','Redispatch Costs','Total Energy Payments','Strategy','Player Selected for Strategy'])
    
-    l = [load_mw,capacity_mw,line_flow,anticipation,redispatch_pricing,rd_dem,sum_amount_with_strategy,spot,strategy,gen_sel]
+    l = [load_mw,capacity_mw,line_flow,clearing_price,anticipation,redispatch_pricing,rd_dem,sum_amount_with_strategy,spot,strategy,gen_sel]
     system_characteristics_data .loc[len(system_characteristics_data )] = l
 
     
@@ -276,6 +278,8 @@ def load_main(input_data,anticipation,bool_var,merit_order_df,power_mw,capacity_
 
     # generate input dataframe
     input_df = pd.DataFrame(input_data)
+    input_df  = input_df.replace(0, 0.0001)
+
     input_df['Name'] = [f"L{i+1}" for i in range(len(input_df))]
 
     # create dataframes for both nodes
@@ -460,7 +464,7 @@ def load_main(input_data,anticipation,bool_var,merit_order_df,power_mw,capacity_
     ud_merit['color'] = "#356CA5"
      
     sum_amount_with_strategy  = rd_dem * ud_price -  rd_dem * dd_price
-    mul = mo_df['bid'] * mo_df['disp']
+    mul = clearing_price * mo_df['disp']
    
     spot = mul.sum()
     if redispatch_pricing == "pay-as-bid":
@@ -487,9 +491,9 @@ def load_main(input_data,anticipation,bool_var,merit_order_df,power_mw,capacity_
     if anticipation == 'No Anticipation':
         strategy = None
         load_sel = None
-    system_characteristics_data = pd.DataFrame(columns=['Power Generated','Line Capacity','Anticipation','Pricing Mechanism','Redispatch Demand','Redispatch Costs','Total Energy Payments','Strategy','Player Selected for Strategy'])
+    system_characteristics_data = pd.DataFrame(columns=['Power Generated','Line Capacity','Clearing Price','Anticipation','Pricing Mechanism','Redispatch Demand','Redispatch Costs','Total Energy Payments','Strategy','Player Selected for Strategy'])
 
-    l = [power_mw,capacity_mw,anticipation,redispatch_pricing,rd_dem,-1*sum_amount_with_strategy,spot,strategy,load_sel]
+    l = [power_mw,capacity_mw,clearing_price,anticipation,redispatch_pricing,rd_dem,-1*sum_amount_with_strategy,spot,strategy,load_sel]
     system_characteristics_data .loc[len(system_characteristics_data )] = l
 
     return mo_df,system_characteristics_data

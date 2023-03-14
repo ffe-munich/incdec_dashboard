@@ -39,16 +39,30 @@ color_dict = {"1B": "#356CA5", "2C": "#F7D507", "1D": "#8AB5E1",
               "3A": "#7A1C1C"}
 merit_order_df = 0
 input_data = {'Load': [3, 3, 3, 3, 3, 3],  # production capacities of generators
-              'WTP': [90, 60, 40, 30, 45, 50],  # marginal costs of generators
+              'WTP': [35, 10, 40, 30, 45, 50],  # marginal costs of generators
               # generator location (1: export costr. node; 2: import constr. node)
               'Node': [1, 1, 1, 2, 2, 2],
-              'Game': [True, True, True, True, True, True]}  # Allow, or forbid strategic bidding
+              'Game': [True, True, True, True, True, True]}
 
-# markups to set bids above marginal costs
+# # Allow, or forbid strategic bidding
+# input_data = {'Load': [1.25, 1.25, 1.25, 1.25, 1.25, 1.25,1.25,1.25],  # production capacities of generators
+#                   'WTP': [100, 85.71, 71.42,57.14, 42.85, 28.57, 14.28,0],  # marginal costs of generators
+#                   # generator location (1: export costr. node; 2: import constr. node)
+#                   'Node': [2, 2, 2,2,1, 1, 1,1 ],
+#                   'Game': [True, True, True, True, True,True, True, True]}  # Allow, or forbid strategic bidding 
+# # markups to set bids above marginal costs
+
+
+# input_data = {'Load': [2.5, 2.5, 2.5, 2.5],  # production capacities of generators
+#                   'WTP': [50,50,50,50],  # marginal costs of generators
+#                   # generator location (1: export costr. node; 2: import constr. node)
+#                   'Node': [2, 2, 1,1 ],
+#                   'Game': [True, True, True, True]} 
 markup = 0
 
 # generate input dataframe
 input_df = pd.DataFrame(input_data)
+input_df  = input_df.replace(0, 0.0001)
 input_df['Name'] = [f"L{i+1}" for i in range(len(input_df))]
 
 # create dataframes for both nodes
@@ -56,7 +70,7 @@ node1_df = input_df[['Name', 'Load', 'WTP', 'Game']][input_df.Node == 1]
 node2_df = input_df[['Name', 'Load', 'WTP', 'Game']][input_df.Node == 2]
 payoff_df = pd.DataFrame(columns=input_df['Name'])
 
-
+print(input_df.head())
 # convert dataframes to editable dash tables
 cols = [
     dict(id='Name', name='Name'),
@@ -154,6 +168,7 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
     input_df = pd.concat([node1_df, node2_df])
     input_df['bid'] = input_df.WTP+markup
     input_df.set_index(['Name'], inplace=True)
+    print(input_df.head())
     
     global c
     c= c
@@ -169,13 +184,15 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
 
 #    create merit order
     mo = input_df.sort_values(by='bid', ascending=False)
-
+   
     if anticipation == 'No Anticipation':
         bool_var = True
 
     if bool_var:
+        print("asdasdasdasdasdasdasdasd")
         mo_1, mo_2, rd_dem, dd_price, ud_price = redispatch(
             mo=mo, power=power_mw, line_cap=capacity_mw,pay_as_bid = redispatch_pricing, freeze_bool = 'False')
+        print("Inside load_dashboard main function")
         
         if redispatch_pricing == 'pay-as-bid':
             mo_1.red_bid = mo_1.pay_as_bid_red
@@ -387,8 +404,8 @@ def update_graph(data1_2, columns1_2, data2_2, columns2_2, power_mw, capacity_mw
         else:
             l.append("<b>%{width}</b> MW at <br><b>%{y}</b> €/MWh")
     ud_merit.hover_template = l  
-         
-   
+        
+    print("mo_df.head()")
     mo_df = mo_df.to_dict('records')
     mo = mo.to_dict('records')
     dd_merit['color'] = "#EC9302"

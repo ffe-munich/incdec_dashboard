@@ -35,8 +35,8 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
     mo = pd.DataFrame(mo)
     dd_merit = pd.DataFrame(dd_merit)
     ud_merit = pd.DataFrame(ud_merit)
-    print("dd_merit")
-    print(dd_merit.columns)
+    # print("dd_merit")
+    # print(dd_merit.columns)
     rd_dem_dd= rd_dem
     rd_dem_ud = rd_dem
     strategy_box_text = " " 
@@ -49,7 +49,10 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
     if type == 'load': 
         capacity_mw = mw_1
         load_mw = mw_2
-        mul = mo_df['bid'] * mo_df['disp']
+        # print("mo_df")
+        # print(mo_df.head())
+        mul = clearing_price* mo_df['disp']
+        
         spot = mul.sum()
         try:
             dd_price = dd_merit.red_bid[dd_merit.rd != 0].max()
@@ -65,8 +68,8 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
         if math.isnan(ud_price):
             ud_price = 0
             
-        print("dd_price: ", dd_price)
-        print(dd_merit.head())
+        # print("dd_price: ", dd_price)
+        # print(dd_merit.head())
         if dd_merit.empty:
             dd_merit = pd.DataFrame(columns=['Name', 'Load', 'WTP', 'Game', 'Node', 'bid', 'disp', 'rd','hover_template', 'red_bid', 'pay_as_bid_red', 'left_to_receive','real_WTP', 'power_receive', 'payoff_without_anticipated', 'mark','x_pos', 'color'])
         
@@ -82,7 +85,7 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
         
         load_mw = mw_1
         capacity_mw = mw_2
-        mul = mo_df['bid'] * mo_df['disp']
+        mul = clearing_price * mo_df['disp']
         spot = mul.sum()
         
         try:
@@ -560,7 +563,7 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
     if  math.isnan(sum_amount):
         spot = spot 
     else:       
-        spot = spot + sum_amount
+        spot = spot - sum_amount
     spot =  round(spot) if format(spot,'.2f')[-2:] == '00' else format(spot,'.2f')
     sum_amount = round(sum_amount) if format(sum_amount,'.2f')[-2:] == '00' else format(sum_amount,'.2f')
     cap_cons = ""
@@ -621,7 +624,7 @@ def strategies_sel(sel, strategy, mw_1, mo_df, mo, dd_merit, ud_merit, rd_dem, c
         payoff_export_dataframe = payoff_export_dataframe.to_dict('records')
     
     if return_dataframe:
-        print("sum_amount: ", sum_amount)
+        # print("sum_amount: ", sum_amount)
         return payoff_table,sum_amount,spot
         
 
